@@ -18,7 +18,7 @@ import java.nio.file.StandardCopyOption;
 @UtilityClass
 public final class EmailUtils {
 
-    public static void saveAttachment(Message message) {
+    public static String saveAttachment(Message message) {
         try {
             Multipart multipart = (Multipart) message.getContent();
             for (int i = 0; i < multipart.getCount(); i++) {
@@ -33,11 +33,13 @@ public final class EmailUtils {
                         Path filePath = new File(attachmentsDir, fileName).toPath();
                         Files.copy(bodyPart.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
                         log.info("Attachment saved: " + filePath);
+                        return fileName;
                     }
                 }
             }
         } catch (IOException | MessagingException e) {
             log.error("Error while trying to save attachment", e);
         }
+        return null;
     }
 }

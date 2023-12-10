@@ -1,7 +1,42 @@
-konnekt:
-  clientId:
-  clientSecret:
-  authUri:
-  tokenUri:
-  authProvider:
-  projectId:
+spring:
+  data:
+    mongodb:
+      database: ${database.name}
+      uri: ${database.protocol}${database.username}${database.user_password_seperator}${database.password}${database.host_seperator}${database.host}/${database.auth_db}${database.params_seperator}${database.cnx_params}
+      authentication-database:
+      auto-index-creation: true
+  jackson:
+    serialization:
+      write-dates-as-timestamps: false
+  security:
+    oauth2:
+      client:
+        registration:
+          google:
+            clientId: 1057135147848-urgk5ko6huckh31r8c4mrutkek3d2kig.apps.googleusercontent.com
+            clientSecret: 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
+            scope:
+              - openid
+              - https://mail.google.com/
+              - email
+              - profile
+        provider:
+          google:
+            authorizationUri: https://accounts.google.com/o/oauth2/auth?access_type=offline
+            tokenUri: https://oauth2.googleapis.com/token
+database:
+  protocol: 'mongodb://'
+  host: localhost:27017
+  name: konnekt
+  username: myga-dev
+  password: myga-dev
+  auth_db: admin
+  params_seperator:
+  user_password_seperator: ':'
+  seperator_host_port: ':'
+  host_seperator: '@'
+  cnx_params:
+
+logging:
+  level:
+    web: DEBUG

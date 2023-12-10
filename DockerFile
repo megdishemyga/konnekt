@@ -1,0 +1,20 @@
+ARG EXPLODED_PATH=""
+
+ENV PRODUCT_NAME "MYNV"
+ENV SERVICE_NAME "KONNEKT"
+ENV RIO_LOG_PRODUCT "MYNV-KONNEKT"
+ENV APP_NAME "${PRODUCT_NAME}-${SERVICE_NAME}"
+
+LABEL   name="${APP_NAME}" \
+        maintainer="MYGA"
+
+
+RUN mkdir -p "/opt/${APP_NAME}"
+WORKDIR "/opt/${APP_NAME}"
+
+COPY ${EXPLODED_PATH}/BOOT-INF/lib app/lib
+COPY ${EXPLODED_PATH}/META-INF app/META-INF
+COPY ${EXPLODED_PATH}/org app/org
+COPY ${EXPLODED_PATH}/BOOT-INF/classes app/
+
+ENTRYPOINT ["sh", "-c", "java ${JAVA_OPTIONS} -cp app:app/lib/* org.springframework.boot.loader.JarLauncher" ]
