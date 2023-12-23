@@ -1,10 +1,11 @@
 package com.myga.konnekt.infra.inbound.mail;
 
+import com.sun.mail.imap.IMAPMessage;
 import lombok.experimental.UtilityClass;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 
 import javax.mail.BodyPart;
-import javax.mail.Message;
 import javax.mail.MessagingException;
 import javax.mail.Multipart;
 import javax.mail.Part;
@@ -18,28 +19,26 @@ import java.nio.file.StandardCopyOption;
 @UtilityClass
 public final class EmailUtils {
 
-    public static String saveAttachment(Message message) {
+    public static void saveAttachment(IMAPMessage message) {
         try {
-            Multipart multipart = (Multipart) message.getContent();
-            for (int i = 0; i < multipart.getCount(); i++) {
-                BodyPart bodyPart = multipart.getBodyPart(i);
-                if (Part.ATTACHMENT.equalsIgnoreCase(bodyPart.getDisposition())) {
-                    String fileName = bodyPart.getFileName();
-                    if (fileName != null && !fileName.isEmpty()) {
-                        File attachmentsDir = new File("attachments");
-                        if (!attachmentsDir.exists()) {
-                            attachmentsDir.mkdir();
+            log.info("**********************" + message.getSubject());
+            if (message.isMimeType("multipart/*")) {
+                Multipart multipart = (Multipart) message.getContent();
+                for (int i = 0; i < multipart.getCount(); i++) {
+                    BodyPart bodyPart = multipart.getBodyPart(i);
+                    if (Part.ATTACHMENT.equalsIgnoreCase(bodyPart.getDisposition())) {
+                        String fileName = bodyPart.getFileName();
+                        if (StringUtils.isNotBlank(fileName)) {
+                            File attachmentsDir = new File("attachments");
+                            Path filePath = new File(attachmentsDir, fileName).toPath();
+                            Files.copy(bodyPart.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
+                            log.info("Attachment saved: " + filePath);
                         }
-                        Path filePath = new File(attachmentsDir, fileName).toPath();
-                        Files.copy(bodyPart.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
-                        log.info("Attachment saved: " + filePath);
-                        return fileName;
                     }
                 }
             }
         } catch (IOException | MessagingException e) {
             log.error("Error while trying to save attachment", e);
         }
-        return null;
     }
 }

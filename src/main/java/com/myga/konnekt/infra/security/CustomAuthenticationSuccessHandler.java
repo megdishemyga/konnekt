@@ -34,6 +34,7 @@ public class CustomAuthenticationSuccessHandler implements ServerAuthenticationS
                 .accessToken(accessToken)
                 .expirationTimeMilliseconds(epochSecond)
                 .email(email)
+                .provider(authorizedClient.getClientRegistration().getRegistrationId())
                 .id(authorizedClient.getPrincipalName())
                 .build();
     }
@@ -43,7 +44,6 @@ public class CustomAuthenticationSuccessHandler implements ServerAuthenticationS
         OAuth2AuthenticationToken oauth2Authentication = (OAuth2AuthenticationToken) authentication;
         final var principal = (DefaultOidcUser) authentication.getPrincipal();
         final String email = principal.getEmail();
-        final var tokenValue = principal.getIdToken().getTokenValue();
         String clientRegistrationId = oauth2Authentication.getAuthorizedClientRegistrationId();
         return authorizedClientService.loadAuthorizedClient(
                 clientRegistrationId,

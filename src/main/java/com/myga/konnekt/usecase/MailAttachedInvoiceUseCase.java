@@ -1,25 +1,22 @@
 package com.myga.konnekt.usecase;
 
-import com.myga.konnekt.domain.credentials.Credentials;
 import com.myga.konnekt.domain.credentials.CredentialsRepository;
+import com.myga.konnekt.infra.inbound.mail.google.GmailImapReceiver;
+import com.myga.konnekt.usecase.service.TokenProvider;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import reactor.core.publisher.Mono;
 
 @Service
 @RequiredArgsConstructor
 public class MailAttachedInvoiceUseCase {
     private final CredentialsRepository credentialsRepository;
+    private final TokenProvider tokenProvider;
+    private final GmailImapReceiver gmailImapReceiver;
 
-    public Mono<Credentials> load(String email) {
-        return credentialsRepository.loadCredentials(email)
-                .map(this::refreshToken);
-    }
-
-    public Credentials refreshToken(Credentials credentials) {
-        if (credentials.isExpired()) {
-            //not implemented
-        }
-        return credentials;
+    public void process(final String email) {
+        credentialsRepository.loadCredentials(email)
+                .flatMap(tokenProvider::refreshToken)
+                .flatMap(credentialsRepository::save)
+                .subscribe(gmailImapReceiver::searchAttachedInvoices);
     }
 }
